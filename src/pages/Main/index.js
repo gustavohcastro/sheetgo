@@ -1,59 +1,68 @@
-import React,{useState, useCallback, useEffect} from 'react';
+import React,{useState, useEffect} from 'react';
 import { Link } from 'react-router-dom';
 
-import {FaGithub, FaPlus, FaSpinner, FaBars, FaTrash} from 'react-icons/fa'
-import {Container, Form, SubmitButton, List, DeleteButton} from './styles';
-import api from '../../services/api';
+import {FaBook, FaChevronRight, FaPlus, FaSpinner, FaBars} from 'react-icons/fa'
+import {Container, Form, SubmitButton, List, SortView} from './styles';
 
 export default function Main(){
 
-    const [newRepo, setNewRepo] = useState('');
+    const [title, setTitle] = useState('');
+    const [author, setAuthor] = useState('');
+    const [category, setCategory] = useState('');
     const [repositorios, setRepositorios] = useState([]);
     const [loading, setLoading] = useState(false);
     const [alert, setAlert] = useState(null);
 
+    const crypto = require('crypto');
+
     //DidMount
     useEffect(()=>{
-        const repoStorage = localStorage.getItem('repos');
+        const repoStorage = JSON.parse(localStorage.getItem('BOOKS'));
 
         if (repoStorage){
-            setRepositorios(JSON.parse(repoStorage));
+            setRepositorios(repoStorage);
         }
 
     },[])
     
     //DidUpdate
     useEffect(()=>{
-        localStorage.setItem('repos', JSON.stringify(repositorios))
+        localStorage.setItem('BOOKS', JSON.stringify(repositorios))
     },[repositorios])
 
-    function handleinputChange(e){
-        setNewRepo(e.target.value);
-        setAlert(null);
-    }
+    
     async function handleSubmit(e){
         e.preventDefault();
         setLoading(true);
         setAlert(null);
 
         try{
-
-            if (newRepo === ''){
-                throw new Error('Você precisa indicar um repositorio!');
-            }
-            const response = await api.get(`repos/${newRepo}`);
-
-            const hasRespo = repositorios.find(repo => repo.name === newRepo)
+            if (title === '' && author === '' && category === '' ){
+                setAlert('Preencha todos os campos');
+                throw new Error('Preencha todos os campos');
+            }   
+                
+            const hasRespo = repositorios.find(repo => repo.title === title)
 
             if (hasRespo){
-                throw new Error('Repositorio já existe');
+                setAlert('Livro já existe')
+                throw new Error('Livro já existe');
             }
+            const id = crypto.randomBytes(6).toString('hex');
             const data = {
-                name : response.data.full_name
+                id : id,
+                title : title,
+                author : author,
+                category : category,
+                description : '',
+                deleted : false,
+                timestamp : new Date(Date.now()).toLocaleString()
+                
             }
 
             setRepositorios([...repositorios, data]);
-            setNewRepo('');
+            setTitle('');
+            setAuthor('');
         }catch(error){
             setAlert(true);
             console.log(error)
@@ -63,22 +72,31 @@ export default function Main(){
        
     }
 
-    const handleDelete = useCallback((repo) => {
-        const find  = repositorios.filter( r => r.name !== repo);
-        setRepositorios(find);
-    }, [repositorios]);
+    function handleSort(e){
+        // const data = 
+        // console.log(data)
+    }
 
     return(
       <Container>
         <h1>
-            <FaGithub size={25}/>
-            Meus Repositorios
+            <FaBook size={25}/>
+            Meus Livros
         </h1>
 
         <Form onSubmit={handleSubmit} error={alert}>
-            <input type="text" placeholder="Adicionar Repositorios" 
-            value={newRepo} onChange={handleinputChange}/>
+            <input type="text" placeholder="Nome do Livro" 
+             onChange={e => setTitle(e.target.value)}/>
 
+            <input type="text" placeholder="Autor" 
+             onChange={e => setAuthor(e.target.value)}/>
+
+            <select onChange={ e => setCategory(e.target.value)}>
+                <option value="">Escolha uma categoria</option>
+                <option value="reading">Estou lendo</option>
+                <option value="wantToRead">Quero Ler</option>
+                <option value="read">Já lido</option>
+            </select>
             <SubmitButton loading={loading ? 1 : 0}>
                 {
                     loading ? (
@@ -89,23 +107,113 @@ export default function Main(){
                 }
             </SubmitButton>
         </Form>
-
+        <SortView>
+            <label>Ordenar por:</label>
+            <select onChange={handleSort}>
+                <option value="time">Data de Criação</option>
+                <option value="alf">Alfábetico</option>
+            </select>
+        </SortView>
+        <Link>
+        <FaChevronRight size={20} color="#9A1449"/>
+        <p>Sem Categoria</p>
+        </Link>
         <List>
-           {repositorios.map(repo => (
-                <li key={repo.name}>
-                    <span>
-                        <DeleteButton onClick={()=>handleDelete(repo.name)}>
-                            <FaTrash size={14}/>
-                        </DeleteButton>
-                        {repo.name}
-                    </span>
-                    <Link to={`/repositorio/${encodeURIComponent(repo.name)}`}>
-                        <FaBars size={20}/>
-                    </Link>
-                </li>
-            ))}
+           {repositorios.map(repo => {
+                if(repo.category !== '') {
+                    return "";
+                  }
+                  else if(repo.deleted === false){
+                  return (
+                        <li key={repo.id}>
+                        <span>
+                            <Link to={`/book/${repo.title}`}>
+                                <FaBars color="#9A1449" size={20}/>
+                            </Link>
+                            {repo.title}
+                        </span>
+                    
+                    </li>
+                  )
+                }})}
            
         </List>
+        <Link>
+            <FaChevronRight size={20} color="#9A1449"/>
+            <p>Estou Lendo</p>
+        </Link>
+        <List>
+           {repositorios.map(repo => {
+                if(repo.category === 'reading' && repo.deleted === false) {
+                    return (
+                        <li key={repo.id}>
+                        <span>
+                        <Link to={`/book/${repo.title}`}>
+                            <FaBars color="#9A1449" size={20}/>
+                        </Link>
+                            {repo.title}
+                        </span>
+                      
+                    </li>
+                  )
+                   
+                  }
+                  else{
+                    return "";
+                }})}
+           
+        </List>
+        <Link>
+            <FaChevronRight size={20} color="#9A1449"/>
+            <p>Irei Ler</p>
+        </Link>
+        <List>
+           {repositorios.map(repo => {
+                if(repo.category === 'wantToRead' && repo.deleted === false) {
+                    return (
+                        <li key={repo.id}>
+                        <span>
+                        <Link to={`/book/${repo.title}`}>
+                            <FaBars color="#9A1449" size={20}/>
+                        </Link>
+                            {repo.title}
+                        </span>
+                       
+                    </li>
+                  )
+                   
+                  }
+                  else{
+                    return "";
+                }})}
+           
+        </List>
+        <Link>
+            <FaChevronRight size={20} color="#9A1449"/>
+            <p>Já lidos</p>
+        </Link>
+        <List>
+           {repositorios.map(repo => {
+                if(repo.category === 'read' && repo.deleted === false) {
+                    return (
+                        <li key={repo.id}>
+                        <span>
+                        <Link to={`/book/${repo.title}`}>
+                            <FaBars color="#9A1449" size={20}/>
+                        </Link>
+                            {repo.title}
+                        </span>
+                        
+                    </li>
+                  )
+                   
+                  }
+                  else{
+                    return "";
+                }})}
+           
+        </List>
+        
 
       </Container>
     )
