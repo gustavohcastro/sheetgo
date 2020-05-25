@@ -114,7 +114,7 @@ export default function Main(){
                 <option value="alf">Alfábetico</option>
             </select>
         </SortView>
-        <Link>
+        <Link to="/categories/nocategory">
         <FaChevronRight size={20} color="#9A1449"/>
         <p>Sem Categoria</p>
         </Link>
@@ -138,7 +138,7 @@ export default function Main(){
                 }})}
            
         </List>
-        <Link>
+        <Link to="/categories/reading">
             <FaChevronRight size={20} color="#9A1449"/>
             <p>Estou Lendo</p>
         </Link>
@@ -163,7 +163,7 @@ export default function Main(){
                 }})}
            
         </List>
-        <Link>
+        <Link to="/categories/wantToRead">
             <FaChevronRight size={20} color="#9A1449"/>
             <p>Irei Ler</p>
         </Link>
@@ -188,7 +188,7 @@ export default function Main(){
                 }})}
            
         </List>
-        <Link>
+        <Link to="/categories/read">
             <FaChevronRight size={20} color="#9A1449"/>
             <p>Já lidos</p>
         </Link>

@@ -135,6 +135,17 @@ export default function Book({match}){
        history.push('/');
     }
 
+    function handleDeleteComment(item){
+        item.deleted = true;
+        const commentsList = JSON.parse(localStorage.getItem('COMMENTS'));
+        commentsList.map( (comentario, index) => {
+            if (item.id === comentario.id) {
+                commentsList[index] = item;
+            }
+        })
+        setComments(commentsList);
+    }
+
     if (loading){
         return(
         <Loading>
@@ -177,18 +188,18 @@ export default function Book({match}){
                 </form>
                 <ul>
                     {comments.map( comentario => {
-                    if (comentario.parentId === idBook) {
+                    if (comentario.parentId === idBook && comentario.deleted === false) {
                         return (
-                            <li>
+                            <li key={comentario.id}>
                                 <div>
-                                    <Link>
+                                    <button>
                                         <FaEdit color="#9A1449" size={20}/>
-                                    </Link>
+                                    </button>
                                     <p>{comentario.body}</p>
                                 </div>
-                                <Link>
+                                <button onClick={()=> {handleDeleteComment(comentario)}}>
                                     <FaTrash color="#9A1449" size={20}/>
-                                </Link>
+                                </button>
                             </li>
                         )
                     }else{

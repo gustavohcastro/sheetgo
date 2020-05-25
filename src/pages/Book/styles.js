@@ -167,6 +167,11 @@ export const Comments = styled.div`
                     margin-left : 5px;
                 }
             }
+            button {
+                border :0;
+                outline : 0;
+                background-color : transparent;
+            }
         }
     }
 
