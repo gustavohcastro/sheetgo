@@ -29,9 +29,11 @@ export default function Book({match}){
     useEffect(()=>{
         
         async function load(){
+            //Carrega o livro exibido e os comentarios do mesmo
             const bookTitle =  decodeURIComponent(match.params.title);
             const data = JSON.parse(localStorage.getItem('BOOKS'));
 
+            //inicia os estados com os valores do livro
             data.map( (item) => {
                 if(item.title === bookTitle){
                     setTitle(item.title);
@@ -52,10 +54,12 @@ export default function Book({match}){
         load()
     },[match.params.title]);
 
+    //ComponentDidUpdate - Quando a lista é atualiza, atualiza o storage
     useEffect(()=>{
         localStorage.setItem('COMMENTS', JSON.stringify(comments))
     },[comments])
 
+    // Compõe um novo comentário
     function handleAddComment(e){
         e.preventDefault();
         setLoading(true);
@@ -63,6 +67,7 @@ export default function Book({match}){
 
         try{
             if (comments === ''){
+                //Validação
                 setAlert('Preencha todos os campos');
                 throw new Error('Preencha todos os campos');
             }   
@@ -75,7 +80,7 @@ export default function Book({match}){
                 timestamp : Date.now()
                 
             }
-            console.log(data);
+            //Organiza os comentários
             setComments([...comments, data]);
             setNewComment('');
         }catch(error){
@@ -87,6 +92,7 @@ export default function Book({match}){
        
     }
 
+    // Atualiza estados e compõe um novo objeto atualizado
     async function handleUpdate(e){
         e.preventDefault();
 
@@ -101,16 +107,19 @@ export default function Book({match}){
         }
         const data = JSON.parse(localStorage.getItem('BOOKS'));
 
+        //localiza o item correto na lista de livros
         data.map( (item, index) => {
             if( item.id === update.id){
                 data[index] = update;
             }
         });
         
+        // atualiza os livros
        await  localStorage.setItem('BOOKS', JSON.stringify(data));
 
     }
 
+    //Deixa de exibir o livro na Home - Controle booleano
     async function handleDelete(e){
         e.preventDefault();
 
@@ -125,16 +134,19 @@ export default function Book({match}){
         }
         const data = JSON.parse(localStorage.getItem('BOOKS'));
 
+        //localiza o item correto e atualiza o mesmo na lista
         data.map( (item, index) => {
             if( item.id === update.id){
                 data[index] = update;
             }
         });
         
+       //persiste os dados no storage e redireciona para a home 
        await  localStorage.setItem('BOOKS', JSON.stringify(data));
        history.push('/');
     }
 
+     //Deixa de exibir o comentario na lista - Controle booleano
     function handleDeleteComment(item){
         item.deleted = true;
         const commentsList = JSON.parse(localStorage.getItem('COMMENTS'));
@@ -146,7 +158,7 @@ export default function Book({match}){
         setComments(commentsList);
     }
 
-
+    //Edita o comentário e atualiza a lista
     async function handleEditComment(item){
         const updateComment = prompt("Editando o seu comentário!");
 
@@ -160,17 +172,19 @@ export default function Book({match}){
         }
         const data = JSON.parse(localStorage.getItem('COMMENTS'));
 
+        //localiza qual o comentário que deve ser atualizado
         data.map( (item, index) => {
             if( item.id === update.id){
                 data[index] = update;
             }
         });
         
-       await  localStorage.setItem('COMMENTS', JSON.stringify(data));
-       setComments(data);
+       //persiste os dados atualizados e atualiza a lista de comentários
+        await  localStorage.setItem('COMMENTS', JSON.stringify(data));
+        setComments(data);
         
     }
-
+    //caso não tenha carregado os dados do storage, o sistema renderiza uma tela de carregamento
     if (loading){
         return(
         <Loading>
