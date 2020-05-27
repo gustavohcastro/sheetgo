@@ -44,7 +44,7 @@ export default function Book({match}){
                 }
             })
 
-            const commentsData = JSON.parse(localStorage.getItem('COMMENTS'));
+            const commentsData = JSON.parse(localStorage.getItem('COMMENTS'));                    
             setComments(commentsData);
             setLoading(false)
         }
@@ -146,6 +146,31 @@ export default function Book({match}){
         setComments(commentsList);
     }
 
+
+    async function handleEditComment(item){
+        const updateComment = prompt("Editando o seu comentário!");
+
+        const update = {
+            id : item.id,
+            parentId : item.parentId,
+            deleted : item.deleted,
+            body : updateComment,
+            timestamp : item.timestamp
+           
+        }
+        const data = JSON.parse(localStorage.getItem('COMMENTS'));
+
+        data.map( (item, index) => {
+            if( item.id === update.id){
+                data[index] = update;
+            }
+        });
+        
+       await  localStorage.setItem('COMMENTS', JSON.stringify(data));
+       setComments(data);
+        
+    }
+
     if (loading){
         return(
         <Loading>
@@ -187,12 +212,13 @@ export default function Book({match}){
                     </button>
                 </form>
                 <ul>
-                    {comments.map( comentario => {
+                    {
+                    comments.map( comentario => {
                     if (comentario.parentId === idBook && comentario.deleted === false) {
                         return (
                             <li key={comentario.id}>
                                 <div>
-                                    <button>
+                                    <button onClick={() => {handleEditComment(comentario)}}>
                                         <FaEdit color="#9A1449" size={20}/>
                                     </button>
                                     <p>{comentario.body}</p>
