@@ -19,7 +19,7 @@ After install dependencies, you can run the application.
 
 ## Running the tests
 
-Explain how to run the automated tests for this system
+Explain how to run the app in your localhost for this system
 
 ```
 yarn start
