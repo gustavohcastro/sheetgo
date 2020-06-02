@@ -13,7 +13,7 @@ A step by step series of examples that tell you how to get a development env run
 Say what the step will be, this command will install project's dependencies 
 
 ```
-yarn install
+yarn add
 ```
 After install dependencies, you can run the application.
 
